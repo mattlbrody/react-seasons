@@ -1,45 +1,37 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import SeasonDisplay from './SeasonDisplay';
+import Loader from './Loader';
 
 
 class App extends React.Component {
-	constructor(props) {
-		super(props)
 
-		// THIS IS THE ONLY TIME we do direct assignment to this.state
-		this.state = { lat: null, errorMessage: '' };
+	state = { lat: null, errorMessage: ''};
 
+	componentDidMount() {
 		window.navigator.geolocation.getCurrentPosition(
-			(position) => {
-				// we called setState!!!!!
-				this.setState({ lat: position.coords.latitude })
-
-				// we did not write, it won't work!!!
-				//this.state.lat = position.cords.latitude
-			},
-			(err) => {
-				this.setState({ errorMessage: err.message})
-			}
+			position => this.setState({ lat: position.coords.latitude }),
+			err => this.setState({ errorMessage: err.message})
 		);
 	}
 
-	componentDidMount() {
-		console.log("my component was rendered to the screen")
-	}
-
-	componentDidUpdate() {
-		console.log('my component updated')
+	renderContent() {
+		if (this.state.errorMessage && !this.state.lat) {
+			return <div>Error: {this.state.ErrorMessage}</div>
+		} else if (this.state.lat && !this.state.errorMessage) {
+			return <SeasonDisplay lat={this.state.lat} />
+		} else if (!this.state.lat && !this.state.errorMessage) {
+			return <Loader message="Please accept location request"/>
+		}
 	}
 
 	// React says we have to define render!!
 	render() {
-		if (this.state.errorMessage && !this.state.lat) {
-			return <div>Error: {this.state.ErrorMessage}</div>
-		} else if (this.state.lat && !this.state.errorMessage) {
-			return <div>latitude: {this.state.lat}</div>
-		} else if (!this.state.lat && !this.state.errorMessage) {
-			return <div>Loading Latitude...</div>
-		}
+		return (
+			<div className="border red">
+				{this.renderContent()}
+			</div>
+		);
 	}
 }
 
